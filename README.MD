@@ -155,6 +155,18 @@ docker run -d -p 3000:3000 moefurina/ncm-api:latest
 2. 在 Vercel 官网新建项目，导入 fork 的仓库
 3. 直接 Deploy
 
+## Netlify 部署
+
+1. fork 本项目
+2. 在 [Netlify](https://app.netlify.com/) 官网点击「Add new site」→「Import an existing project」，选择 fork 的仓库
+3. 构建配置会自动读取仓库根目录的 `netlify.toml`：
+   - Build command：`pnpm i --frozen-lockfile`
+   - Functions directory：`netlify/functions`
+   - Node 版本：22
+4. 直接 Deploy，部署完成后访问 Netlify 分配的域名即可调用 API
+
+> Netlify Functions 为 Serverless 形态，每个容器在冷启动时会自动刷新匿名 token 与 xeapi 公钥（`generateConfig()`），无需手动配置。如需自定义 Cookie、CORS、解灰等行为，可在 Netlify 站点设置 → Environment variables 中配置 `.env.prod.example` 列出的环境变量。
+
 ## 腾讯云 Serverless 部署
 
 1. fork 本项目

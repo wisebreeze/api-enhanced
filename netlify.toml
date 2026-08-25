@@ -1,0 +1,21 @@
+[build]
+  command = "pnpm i --frozen-lockfile"
+  functions = "netlify/functions"
+
+[build.environment]
+  NODE_VERSION = "22"
+  NPM_FLAGS = "--prefix=/dev/null"
+
+# Proxy every path through the Express app exposed as a Netlify Function.
+# 200 status (rewrite, not redirect) keeps the original URL visible to the
+# Express router so module routes like /song/url/v1 keep working.
+[[redirects]]
+  from = "/*"
+  to = "/.netlify/functions/api/:splat"
+  status = 200
+  force = true
+
+  [redirects.headers]
+    Access-Control-Allow-Credentials = "true"
+    Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
+    Access-Control-Allow-Headers = "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version"
