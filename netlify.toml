@@ -1,18 +1,15 @@
 [build]
-  # No build step needed: the function is a single self-contained JS file
-  # with no dependencies (uses Node 18+ global fetch). Netlify just zips
-  # the functions directory and deploys.
+  # No build step needed: the edge function is a single self-contained
+  # Deno/TS file with no dependencies (uses Web standard fetch + Headers).
   command = ""
-  functions = "netlify/functions"
+  edge_functions = "netlify/edge-functions"
 
 [build.environment]
   NODE_VERSION = "22"
 
-# Proxy every path through the Express app exposed as a Netlify Function.
-# 200 status (rewrite, not redirect) keeps the original URL visible to the
-# upstream router so module routes like /song/url/v1 keep working.
-[[redirects]]
-  from = "/*"
-  to = "/.netlify/functions/api/:splat"
-  status = 200
-  force = true
+# Route every path through the edge function. Edge Functions use
+# [[edge_functions]] declarations instead of [[redirects]] — the
+# function receives the original request with path + query intact.
+[[edge_functions]]
+  function = "api"
+  path = "/*"

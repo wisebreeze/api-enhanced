@@ -1,4 +1,4 @@
-# NeteaseCloudMusicApi Enhanced — Netlify Proxy
+# NeteaseCloudMusicApi Enhanced — Netlify Edge Function Proxy
 
 透明中转站，将所有请求转发到上游 NCM API 部署：
 
@@ -8,7 +8,15 @@ https://netease-cloud-music-api-mauve.vercel.app
 
 ## 用途
 
-原版 api-enhanced 在 serverless 环境（Netlify Functions）上冷启动时需要刷新 `anonymous_token` + `xeapi public key`，而上游 NCM 的注册接口频繁触发风控，导致 10 秒函数超时。本仓库改为纯中转：不在本地运行 Express，而是把每个请求原样转发到稳定的上游部署（Vercel 实例），由上游处理 token 生命周期，本函数只负责透传。
+原版 api-enhanced 在 serverless 环境上冷启动时需要刷新 `anonymous_token` + `xeapi public key`，而上游 NCM 的注册接口频繁触发风控，导致函数超时。本仓库改为纯中转：不在本地运行 Express，而是把每个请求原样转发到稳定的上游部署（Vercel 实例），由上游处理 token 生命周期，本函数只负责透传。
+
+## Edge Function
+
+使用 Netlify **Edge Function**（基于 Deno + Web 标准 API），部署到全球边缘节点：
+- 无冷启动延迟（边缘节点常驻）
+- 距离用户更近，延迟更低
+- 响应体流式转发，不缓冲，内存占用低
+- 支持 Web 标准 `fetch` / `Headers` / `Response` API
 
 ## 部署
 
@@ -16,7 +24,7 @@ https://netease-cloud-music-api-mauve.vercel.app
 2. 在 [Netlify](https://app.netlify.com/) 新建站点，导入 fork 的仓库
 3. 构建配置由 `netlify.toml` 自动提供：
    - Build command：空（无构建步骤）
-   - Functions directory：`netlify/functions`
+   - Edge Functions directory：`netlify/edge-functions`
    - Node 版本：22
 4. Deploy，访问 Netlify 分配的域名即可调用 API
 
