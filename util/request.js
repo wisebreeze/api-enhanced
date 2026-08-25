@@ -26,10 +26,17 @@ const {
 } = require('../module/register_checktoken_v3')
 
 // 预先读取匿名token并缓存
-const anonymous_token = fs.readFileSync(
-  path.resolve(tmpPath, './anonymous_token'),
-  'utf-8',
-)
+// In serverless environments (Netlify/Vercel), generateConfig() runs AFTER
+// this module is required and may write a fresh token to disk. A require-
+// time constant would cache the empty file forever, so read on each use.
+const anonymousTokenPath = path.resolve(tmpPath, './anonymous_token')
+const getAnonymousToken = () => {
+  try {
+    return fs.readFileSync(anonymousTokenPath, 'utf-8')
+  } catch (_) {
+    return ''
+  }
+}
 const xeapiPublicKeyPath = path.resolve(tmpPath, './xeapi_public_key')
 let xeapi_public_key = null
 const loadXeapiPublicKey = () => {
@@ -169,7 +176,7 @@ const processCookieObject = (cookie, crypto) => {
   }
 
   if (!processedCookie.MUSIC_U) {
-    processedCookie.MUSIC_A = processedCookie.MUSIC_A || anonymous_token
+    processedCookie.MUSIC_A = processedCookie.MUSIC_A || getAnonymousToken()
   }
 
   return processedCookie
